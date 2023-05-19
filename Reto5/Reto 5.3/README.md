@@ -126,3 +126,110 @@ Este se encuentra en la raiz del repositorio.
    ```
 
    El primero representa, numero de peliculas vista por usuario y valor promedio de calificación, el segundo representa el dia que más peliculas se ha visto, el tercero el día que menos peliculas se han visto, el cuarto el numero de usuarios que ven una misma pelicula y rating promedio, el quinto el día con peor evaluación, el sexto el día con mejor evaluación y el 7 el rating promedio por genero. Para ver el resultado puede [visitar](https://github.com/jpcortesg1/ST0263/blob/main/Reto5/Reto%205.3/peliculas/result.txt)
+
+# 2 Documentación para Wordcount en Apache Spark EN AWS EMR
+
+## Importante
+
+Para poder hacer estos ejercicios es necesarios poder crear un cluster de EMR en aws y tener acceso a este para conectarse mediante ssh. Si quieres crear un cluster con estas carectiristicas puedes [ver](https://github.com/jpcortesg1/ST0263/tree/main/Reto5/Reto%205.1)
+
+También es ncesario conocer sobre gestion de archivos HDFS y S3 vía HUE y SSH, para esto puedes ver [ver](https://github.com/jpcortesg1/ST0263/tree/main/Reto5/Reto%205.2)
+
+Luego es necesario tener en HDFS y S3 los siguientes archivos [data1](https://github.com/jpcortesg1/ST0263/blob/main/Reto5/Reto%205.3/02-mapreduce/data1.txt), [data2](https://github.com/jpcortesg1/ST0263/blob/main/Reto5/Reto%205.3/02-mapreduce/data2.txt)
+
+Esto se hace siguiendo los pasos del [repositorio](https://github.com/jpcortesg1/ST0263/tree/main/Reto5/Reto%205.2)
+
+## 2.1 Ejecutar el wordcount por linea de comando 'pyspark' INTERACTIVO en EMR con datos en HDFS vía ssh en el nodo master.
+
+Primero se hace una conexión ssh al nodo master. Debe tener algo así:
+
+<img src="https://user-images.githubusercontent.com/60229777/239617770-d884c227-aa2d-4d80-9b42-2bdcf0e36c49.png">
+
+Luego ejecutamos el comando pyspark para entrar al shell de pyspark:
+<img src="https://user-images.githubusercontent.com/60229777/239618108-ff14fafe-89b9-410e-b8ae-0f1eb740c73f.png">
+
+Luego corremos el siguiente código para hacer el wordcount:
+
+```python
+# Conéctate al nodo master del clúster EMR a través de ssh
+# Inicia una sesión interactiva de PySpark ejecutando el comando `pyspark` en la línea de comandos
+
+# Lee los datos desde HDFS
+data = sc.textFile("hdfs:///input.txt")
+
+# Realiza el wordcount
+counts = data.flatMap(lambda line: line.split(" ")) \
+             .map(lambda word: (word, 1)) \
+             .reduceByKey(lambda a, b: a + b)
+
+# Muestra los resultados
+output = counts.collect()
+for (word, count) in output:
+    print("%s: %i" % (word, count))
+```
+La salida para data1:
+<img src="https://user-images.githubusercontent.com/60229777/239619102-a8c29fd1-b8f3-4bce-9a22-21eb4620eee8.png">
+
+La salida para data2:
+<img src="https://user-images.githubusercontent.com/60229777/239619102-a8c29fd1-b8f3-4bce-9a22-21eb4620eee8.png">
+
+## 2.2 Ejecutar el wordcount por linea de comando 'pyspark' INTERACTIVO en EMR con datos en S3 (tanto de entrada como de salida)  vía ssh en el nodo master.
+
+Primero se hace una conexión ssh al nodo master. Debe tener algo así:
+
+<img src="https://user-images.githubusercontent.com/60229777/239617770-d884c227-aa2d-4d80-9b42-2bdcf0e36c49.png">
+
+Luego ejecutamos el comando pyspark para entrar al shell de pyspark:
+<img src="https://user-images.githubusercontent.com/60229777/239618108-ff14fafe-89b9-410e-b8ae-0f1eb740c73f.png">
+
+Luego corremos el siguiente código para hacer el wordcount:
+
+```python
+# Conéctate al nodo master del clúster EMR a través de ssh
+# Inicia una sesión interactiva de PySpark ejecutando el comando `pyspark` en la línea de comandos
+
+# Lee los datos desde S3
+data = sc.textFile("s3a://my-bucket/input.txt")
+
+# Realiza el wordcount
+counts = data.flatMap(lambda line: line.split(" ")) \
+             .map(lambda word: (word, 1)) \
+             .reduceByKey(lambda a, b: a + b)
+
+# Guarda los resultados en S3
+counts.saveAsTextFile("s3a://my-bucket/output")
+```
+
+Debemos ver algo así:
+### data 1
+<img src="https://user-images.githubusercontent.com/60229777/239628421-fd30ad62-5759-4930-b708-7dcf1c41b73e.png">
+
+### data 2
+<img src="https://user-images.githubusercontent.com/60229777/239629142-739a06ea-1e59-4d9e-aa7d-c0fb83207e8a.png">
+
+Para verificar que se guardo en s3, podemos ir a la interfaz de aws o hub y verificar que el output este, debemos ver algo así:
+<img src="https://user-images.githubusercontent.com/60229777/239628473-3db1ecc1-4d67-4742-95f1-d8119ee3d323.png">
+<img src="https://user-images.githubusercontent.com/60229777/239628519-2af3648a-98bb-4f12-91eb-92a1d377ed8b.png">
+
+### data 2
+<img src="https://user-images.githubusercontent.com/60229777/239629142-739a06ea-1e59-4d9e-aa7d-c0fb83207e8a.png">
+
+Para verificar que se guardo en s3, podemos ir a la interfaz de aws o hub y verificar que el output este, debemos ver algo así:
+<img src="https://user-images.githubusercontent.com/60229777/239629082-e693136f-d7b4-4128-898d-bd1b0d0769ce.png">
+<img src="https://user-images.githubusercontent.com/60229777/239629116-4a06e8f7-eb69-4c3d-aea9-593deb912330.png">
+
+(En las imagenes solo se enseña un archivo de los dos que salen al correr el código, para ver el otro pueden visitar el bucket y ver ambos archivos)
+
+## 2.3 Ejecutar el wordcount en JupyterHub Notebooks EMR con datos en S3 (tanto datos de entrada como de salida) usando un clúster EMR.
+
+Para este paso debemos inicar sesión en Jupyter Hub, para hacerlo, puedes [leer](https://github.com/jpcortesg1/ST0263/tree/main/Reto5/Reto%205.1)
+
+Luego de iniciar sesión, debemos crear un nuevo notebook, para esto, damos click en new y luego en pyspark.
+
+Este archivo debe verse así:
+<img src="https://user-images.githubusercontent.com/60229777/239633134-71a46d33-aa4d-4a54-9548-b9e5fa81d494.png">
+
+Para verificar podemos ver algo así:
+<img src="https://user-images.githubusercontent.com/60229777/239633158-99035606-0c47-49dc-a869-ebf3ef7353eb.png">
+
+Para verificar la data2 debemos hacer lo mismo.
