@@ -1,0 +1,10 @@
+"Average Salary By SE 5434:"	36000.0
+"Average Salary By Emp 1115:"	62333.333333333336
+"SE number that had EMP 1115:"	2
+"Average Salary By SE 1412:"	55000.0
+"Average Salary By Emp 3237:"	40000.0
+"SE number that had EMP 3237:"	1
+"Average Salary By SE 1212:"	77000.0
+"Average Salary By SE 1234:"	37500.0
+"Average Salary By Emp 3233:"	35500.0
+"SE number that had EMP 3233:"	2
