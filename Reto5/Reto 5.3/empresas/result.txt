@@ -1,0 +1,7 @@
+"EPM - Lowest Value Day:"	"2015-01-02"
+"EPM - Highest Value Day:"	"2015-01-01"
+"Black Day:"	"2015-01-02"
+"exito - Lowest Value Day:"	"2015-01-01"
+"exito - Highest Value Day:"	"2015-01-02"
+"exito - Always Up or Stable:"	true
+"Black Day:"	"2015-01-01"
